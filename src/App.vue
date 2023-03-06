@@ -1,9 +1,19 @@
-<script setup>
-import { RouterView } from 'vue-router'
+<script>
+import { useUserStore } from './stores/user'
+export default {
+  setup() {
+    const userStore = useUserStore()
+    return { userStore }
+  },
+  mounted() {
+    const user = JSON.parse(localStorage.getItem('user'))
+    this.userStore.setUser(user)
+  }
+}
 </script>
 
 <template>
-  <RouterView />
+  <router-view></router-view>
 </template>
 
 <style scoped></style>
