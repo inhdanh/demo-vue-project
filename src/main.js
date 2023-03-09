@@ -19,9 +19,9 @@ const vuetify = createVuetify({
     defaultSet: 'mdi',
     aliases,
     sets: {
-      mdi,
+      mdi
     }
-  },
+  }
 })
 
 import './assets/main.css'

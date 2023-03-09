@@ -1,6 +1,6 @@
 <script>
 import { PAGE_SIZE } from '../constants'
-import { purchaseOrderService } from '../services'
+import { purchaseOrderService, commonServices } from '../services'
 
 export default {
   data() {
@@ -9,17 +9,33 @@ export default {
         page: 1,
         limit: PAGE_SIZE,
         code: null,
-        poStatusId: null
+        poStatusId: null,
+        summary: '',
+        costCenterId: null
+
       },
       purchaseOrders: [],
       loading: false,
       timeout: null,
       pageCount: 0,
-      total: 0
+      total: 0,
+      statusOptions: [
+        { value: '', name: 'All' },
+        { value: 1, name: 'Draft' },
+        { value: 2, name: 'Awaiting Review' },
+        { value: 3, name: 'Completed' },
+        { value: 4, name: 'Awaiting Approval' },
+        { value: 5, name: 'Awaiting Payment' },
+        { value: 6, name: 'Paid' },
+      ],
+      costCenters: []
     }
   },
   mounted() {
     this.getPurchaseOrder(this.params)
+    commonServices.getCostCenterByParams().then(data => {
+      this.costCenters = data.items
+    })
   },
   watch: {
     params: {
@@ -36,6 +52,12 @@ export default {
     },
     'params.poStatusId'() {
       this.params.page = 1
+    },
+    'params.summary'() {
+      this.params.page = 1
+    },
+    'params.costCenterId'() {
+      this.params.page = 1
     }
   },
   methods: {
@@ -48,52 +70,60 @@ export default {
       this.total = data.totalItems
       this.loading = false
     },
-    goToPage(page) {
-      this.params.page = page
+    goToPath(path) {
+      this.$router.push(path)
     }
   }
 }
 </script>
 <template>
-  <h1>Purchase order</h1>
-  <router-link to="/purchase-order/add">Create</router-link>
-  <div class="filter-wrapper">
-    <label>Code<input v-model="params.code" /></label>
-    <label
-      >Status<select v-model="params.poStatusId">
-        <option value="">All</option>
-        <option :value="1">Draft</option>
-        <option :value="2">Awaiting Review</option>
-        <option :value="3">Completed</option>
-        <option :value="4">Awaiting Approval</option>
-        <option :value="5">Awaiting Payment</option>
-        <option :value="6">Paid</option>
-      </select></label
-    >
-  </div>
-  <h3>Total: {{ total }}</h3>
-  <div v-if="loading">Loading...</div>
-  <table v-else class="po-table">
-    <tr>
-      <th>Code</th>
-      <th>Status</th>
-      <th>Title</th>
-      <th>Total Amount</th>
-    </tr>
-    <tr v-for="item in purchaseOrders" :key="item.id">
-      <td>
-        <router-link :to="`/purchase-order/${item.id}`">{{ item.code }}</router-link>
-      </td>
-      <td>{{ item.poStatus?.name }}</td>
-      <td>{{ item.summary }}</td>
-      <td>{{ Number(item.totalPayableTo).toLocaleString() }}</td>
-    </tr>
-  </table>
-  <ul class="pagination">
-    <li :class="{ active: n === params.page }" v-for="n in pageCount" :key="n" @click="goToPage(n)">
-      {{ n }}
-    </li>
-  </ul>
+  <v-container>
+    <h4 class="text-h4">Purchase order</h4>
+    <div class="d-flex justify-end">
+      <v-btn variant="outlined" prepend-icon="mdi-plus-circle" @click="goToPath('/purchase-order/add')">Create</v-btn>
+    </div>
+    <v-row class="mt-5">
+      <v-col cols="3">
+        <v-text-field v-model="params.code" label="Code" />
+      </v-col>
+      <v-col cols="3">
+        <v-select v-model="params.poStatusId" label="Status" :items="statusOptions" item-title="name"
+          item-value="value" />
+      </v-col>
+      <v-col cols="3">
+        <v-text-field v-model="params.summary" label="Summary" />
+      </v-col>
+      <v-col cols="3">
+        <v-select v-model="params.costCenterId" label="Cost Center" :items="costCenters" item-title="name"
+          item-value="id" />
+      </v-col>
+    </v-row>
+    <div class="text-subtitle-1">Total: {{ total }}</div>
+    <div v-if="loading" class="w-100 d-flex justify-center">
+      <v-progress-circular indeterminate color="teal"></v-progress-circular>
+    </div>
+    <v-table v-else>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Status</th>
+          <th>Title</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in purchaseOrders" :key="item.id">
+          <td>
+            <router-link :to="`/purchase-order/${item.id}`">{{ item.code }}</router-link>
+          </td>
+          <td>{{ item.poStatus?.name }}</td>
+          <td>{{ item.summary }}</td>
+          <td>{{ Number(item.totalPayableTo).toLocaleString() }}</td>
+        </tr>
+      </tbody>
+    </v-table>
+    <v-pagination v-model="params.page" :length="pageCount"></v-pagination>
+  </v-container>
 </template>
 
 <style scoped>
@@ -110,17 +140,5 @@ export default {
 
 .pagination li {
   cursor: pointer;
-}
-
-.filter-wrapper {
-  margin-top: 20px;
-}
-
-.po-table {
-  margin-top: 20px;
-}
-
-.po-table td {
-  padding: 5px;
 }
 </style>

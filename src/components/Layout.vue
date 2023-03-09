@@ -1,14 +1,28 @@
 <script>
 import { useUserStore } from '../stores/user'
 import SideBar from '../components/SideBar.vue'
+import { logout } from '../services';
 export default {
   name: 'LayoutPage',
   components: {
     SideBar
   },
+  data() {
+    return {
+      drawer: false
+    }
+  },
   setup() {
     const userStore = useUserStore()
     return { userStore }
+  },
+  methods: {
+    toggleDrawer() {
+      this.drawer = !this.drawer
+    },
+    handleLogout() {
+      logout()
+    }
   }
 }
 </script>
@@ -17,47 +31,29 @@ export default {
   <v-card>
     <v-layout>
       <v-app-bar color="primary" density="compact">
-        <v-app-bar-nav-icon icon="mdi-menu"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon icon="mdi-menu" @click.stop="toggleDrawer"></v-app-bar-nav-icon>
         <v-app-bar-title>App</v-app-bar-title>
         <p>{{ userStore?.user?.name }}</p>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item key="changePassword">
+              <v-list-item-title>Change password</v-list-item-title>
+            </v-list-item>
+            <v-list-item key="logout" @click="handleLogout">
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-app-bar>
-      <div class="main-wrapper">
-        <aside class="side-bar">
-          <SideBar />
-        </aside>
-        <v-main class="main"><router-view></router-view></v-main>
-      </div>
-      <footer class="footer">footer</footer>
+      <v-navigation-drawer v-model="drawer">
+        <SideBar />
+      </v-navigation-drawer>
+      <v-main class="w-100"><router-view></router-view></v-main>
+      <v-footer class="bg-indigo-lighten-1 text-center d-flex flex-column">Footer</v-footer>
     </v-layout>
   </v-card>
 </template>
-
-<style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid gray;
-  height: 100px;
-  padding: 0 10px;
-}
-
-.main-wrapper {
-  display: flex;
-  min-height: calc(100vh - 100px);
-}
-
-.side-bar {
-  border: 1px solid gray;
-  flex: 1;
-}
-
-.main {
-  border: 1px solid gray;
-  flex: 3;
-}
-
-.footer {
-  border: 1px solid gray;
-}
-</style>

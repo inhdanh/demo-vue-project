@@ -1,8 +1,6 @@
 <script>
-import Modal from './Modal.vue'
 export default {
   name: 'ItemModal',
-  components: { Modal },
   props: ['itemEdit', 'subjects'],
   data() {
     return {
@@ -11,13 +9,26 @@ export default {
         unitCost: 0,
         subject: null
       },
-      editIndex: null
+      editIndex: null,
+      rules(fieldName) {
+        return [
+          value => {
+            if (value) return true
+
+            return `You must enter ${fieldName}.`
+          },
+        ]
+      }
     }
   },
   methods: {
-    handleSubmit() {
-      this.$emit('modifyItem', this.item, this.editIndex)
-      this.$emit('close')
+    async handleSubmit() {
+      const { valid } = await this.$refs.form.validate()
+
+      if (valid) {
+        this.$emit('modifyItem', this.item, this.editIndex)
+        this.$emit('close')
+      }
     }
   },
   watch: {
@@ -41,20 +52,25 @@ export default {
 </script>
 
 <template>
-  <Modal>
-    <h3>{{ editIndex !== null ? 'Edit PO' : 'Create PO' }}</h3>
-    <form @submit.prevent="handleSubmit">
-      <label>
-        Subject
-        <select v-model="item.subject">
-          <option v-for="subject in subjects" :key="subject.id" :value="subject.id">
-            {{ subject.name }}
-          </option>
-        </select>
-      </label>
-      <label>Quantity<input :min="0" type="number" v-model="item.quantity" /></label>
-      <label>Unit cost<input :min="0" type="number" v-model="item.unitCost" /></label>
-      <button type="submit">{{ editIndex !== null ? 'Save' : 'Add' }}</button>
-    </form>
-  </Modal>
+  <v-card>
+    <v-container>
+      <div class="text-h6">{{ editIndex !== null ? 'Edit PO' : 'Create PO' }}</div>
+      <v-divider></v-divider>
+      <v-form @submit.prevent="handleSubmit" ref="form" class="mt-5">
+        <v-row>
+          <v-col cols="2">
+            <v-text-field type="number" :min="0" v-model="item.quantity" label="Quantity" :rules="rules('quantity')" />
+          </v-col>
+          <v-col cols="2">
+            <v-text-field type="number" :min="0" v-model="item.unitCost" label="Unit cost" :rules="rules('unit cost')" />
+          </v-col>
+          <v-col cols="4">
+            <v-select v-model="item.subjectId" label="Subject" :items="subjects" item-title="name" item-value="id"
+              :rules="rules('subject')" />
+          </v-col>
+        </v-row>
+        <v-btn type="submit">{{ editIndex !== null ? 'Save' : 'Add' }}</v-btn>
+      </v-form>
+    </v-container>
+  </v-card>
 </template>

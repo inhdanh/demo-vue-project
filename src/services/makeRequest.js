@@ -5,8 +5,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL
 })
 
-const logout = () => {
+export const logout = () => {
   localStorage.removeItem(USER)
+  location.reload()
 }
 
 api.interceptors.request.use(
@@ -25,7 +26,6 @@ api.interceptors.response.use(
   ({ response }) => {
     if (response.status === 401) {
       logout()
-      location.reload()
     }
   }
 )

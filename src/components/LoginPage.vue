@@ -12,47 +12,49 @@ export default {
     return {
       username: '',
       password: '',
-      loading: false
+      loading: false,
+      usernameRules: [
+        value => {
+          if (value) return true
+
+          return 'You must enter username.'
+        },
+      ],
+      passwordRules: [
+        value => {
+          if (value) return true
+
+          return 'You must enter password.'
+        },
+      ],
     }
   },
   methods: {
-    login() {
-      this.loading = true
-      userService.login(this.username, this.password).then((user) => {
-        this.$router.push('/')
-        this.userStore.setUser(user)
-        this.loading = false
-      })
-    }
+    async login() {
+      const { valid } = await this.$refs.form.validate()
+
+      if (valid) {
+        this.loading = true
+        userService.login(this.username, this.password).then((user) => {
+          this.$router.push('/')
+          this.userStore.setUser(user)
+          this.loading = false
+        })
+      }
+    },
   },
-  computed: {
-    isUsernameValid() {
-      return this.username.trim().length > 0
-    },
-    isPasswordValid() {
-      return this.password.trim().length > 0
-    },
-    formValid() {
-      return this.isPasswordValid && this.isUsernameValid
-    }
-  }
 }
 </script>
 <template>
-  <h1>Login</h1>
-  <form v-if="!loading && !userStore.user" @submit.prevent="login">
-    <label
-      >Username:
-      <input v-model="username" type="text" />
-      <div v-if="!isUsernameValid">Please enter username</div>
-    </label>
-    <br />
-    <label
-      >Password:
-      <input v-model="password" type="password" />
-      <div v-if="!isPasswordValid">Please enter password</div>
-    </label>
-    <button type="submit" :disabled="!formValid">Login</button>
-  </form>
-  <div v-else>Loading...</div>
+  <div class="h-screen d-flex justify-center align-center w-100" style="position: absolute;">
+    <v-sheet v-if="!loading && !userStore.user" width="300" class="mx-auto my-auto">
+      <v-form ref="form" @submit.prevent="login">
+        <div class="text-h4 mb-3">Login</div>
+        <v-text-field v-model="username" :rules="usernameRules" label="Username"></v-text-field>
+        <v-text-field v-model="password" :rules="passwordRules" label="Password" type="password"></v-text-field>
+        <v-btn type="submit" block class="mt-2">Login</v-btn>
+      </v-form>
+    </v-sheet>
+    <v-progress-circular v-else indeterminate color="teal"></v-progress-circular>
+  </div>
 </template>

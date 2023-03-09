@@ -2,7 +2,8 @@ import { makeRequest } from '.'
 
 export const commonServices = {
   getCurrencyByParams,
-  getSubjectByParams
+  getSubjectByParams,
+  getCostCenterByParams
 }
 
 function getCurrencyByParams(params = {}) {
@@ -13,6 +14,12 @@ function getCurrencyByParams(params = {}) {
 
 function getSubjectByParams(params = {}) {
   return makeRequest('/setting/school/subject', {
+    params: params
+  })
+}
+
+function getCostCenterByParams(params = {}) {
+  return makeRequest('/setting/school/cost-center', {
     params: params
   })
 }
