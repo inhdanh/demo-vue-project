@@ -6,7 +6,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUser(user) {
       this.user = user
-    },
+    }
   },
   getters: {
     getUser() {

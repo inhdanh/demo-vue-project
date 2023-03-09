@@ -11,14 +11,17 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      loading: false
     }
   },
   methods: {
     login() {
+      this.loading = true
       userService.login(this.username, this.password).then((user) => {
         this.$router.push('/')
         this.userStore.setUser(user)
+        this.loading = false
       })
     }
   },
@@ -37,16 +40,19 @@ export default {
 </script>
 <template>
   <h1>Login</h1>
-  <form @submit.prevent="login">
-    <label>Username:
+  <form v-if="!loading && !userStore.user" @submit.prevent="login">
+    <label
+      >Username:
       <input v-model="username" type="text" />
       <div v-if="!isUsernameValid">Please enter username</div>
     </label>
     <br />
-    <label>Password:
+    <label
+      >Password:
       <input v-model="password" type="password" />
       <div v-if="!isPasswordValid">Please enter password</div>
     </label>
     <button type="submit" :disabled="!formValid">Login</button>
   </form>
+  <div v-else>Loading...</div>
 </template>

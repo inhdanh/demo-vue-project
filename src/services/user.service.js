@@ -1,20 +1,23 @@
-import { makeRequest } from "."
+import { makeRequest } from '.'
+import { USER } from '../constants'
 
 export const userService = {
-	login
+  login
 }
 
 function login(username, password) {
-	return makeRequest('/auth/login', {
-		method: 'POST',
-		data: {
-			username,
-			password
-		}
-	}).then(user => {
-		if (user.access_token) {
-			localStorage.setItem('user', JSON.stringify(user))
-		}
-		return user
-	}).catch(error => Promise.reject(error))
+  return makeRequest('/auth/login', {
+    method: 'POST',
+    data: {
+      username,
+      password
+    }
+  })
+    .then((user) => {
+      if (user.access_token) {
+        localStorage.setItem(USER, JSON.stringify(user))
+      }
+      return user
+    })
+    .catch((error) => Promise.reject(error))
 }
