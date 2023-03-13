@@ -1,97 +1,82 @@
-<script>
+<script setup>
+import { ref, onMounted, computed } from 'vue'
 import { purchaseOrderService, commonServices } from '../services'
 import ItemModal from './ItemModal.vue'
+import { useRoute } from 'vue-router'
+import { useFetch } from '../helpers';
 
-export default {
-  data() {
-    return {
-      poDetail: {
-        code: '',
-        createdBy: {
-          name: ''
-        },
-        summary: '',
-        currency: {
-          code: ''
-        },
-        items: []
-      },
-      loading: false,
-      currencies: [],
-      isShowModal: false,
-      subjects: [],
-      itemEdit: null,
-      rules(fieldName) {
-        return [
-          value => {
-            if (value) return true
+const route = useRoute()
 
-            return `You must enter ${fieldName}.`
-          },
-        ]
-      },
-      itemPage: 1,
-      itemsPerPage: 2
-    }
+const poDetail = ref({
+  code: '',
+  createdBy: {
+    name: ''
   },
-  mounted() {
-    const id = this.$route.params.id
-
-    if (id) {
-      this.loading = true
-      purchaseOrderService.getPurchaseOrderById(id).then((data) => {
-        this.poDetail = data
-        this.loading = false
-      })
-    }
-
-    commonServices.getCurrencyByParams().then((data) => {
-      this.currencies = data.items
-    })
-
-    commonServices.getSubjectByParams().then((data) => {
-      this.subjects = data.items
-    })
+  summary: '',
+  currency: {
+    code: ''
   },
-  components: { ItemModal },
-  methods: {
-    toggleModal() {
-      this.isShowModal = !this.isShowModal
-    },
-    handleShowAdd() {
-      this.isShowModal = true
-      this.itemEdit = null
-    },
-    modifyItem(item, index) {
-      if (index !== null) {
-        this.poDetail.items.splice(index, 1, item)
-      } else {
-        this.poDetail.items.push(item)
-      }
-    },
-    handleShowEdit(index) {
-      this.itemEdit = { item: this.poDetail.items[index], index }
-      this.isShowModal = true
-    },
-    getSubjectName(id) {
-      return this.subjects.find((item) => item.id === id)?.name
-    },
-  },
-  computed: {
-    isEditing() {
-      return !!this.$route.params.id
-    },
-    totalPages() {
-      return Math.floor(this.poDetail.items.length / this.itemsPerPage)
-    },
-    startIndex() {
-      return (this.itemPage - 1) * this.itemsPerPage;
-    },
-    endIndex() {
-      return (this.itemPage - 1) * this.itemsPerPage + this.itemsPerPage;
-    }
+  items: []
+})
+const currencies = ref([])
+const isShowModal = ref(false)
+const subjects = ref([])
+const itemEdit = ref(null)
+const page = ref(1)
+const itemPerPage = 2
+const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}`]
+const { loading, data: dataPO, execute } = useFetch(() => {
+  if (route.params.id)
+    purchaseOrderService.getPurchaseOrderById(route.params.id)
+})
+
+onMounted(async () => {
+
+  await execute()
+  poDetail.value = dataPO.value
+
+  commonServices.getCurrencyByParams().then((data) => {
+    currencies.value = data.items
+  })
+
+  commonServices.getSubjectByParams().then((data) => {
+    subjects.value = data.items
+  })
+})
+
+const toggleModal = () => {
+  isShowModal.value = !isShowModal.value
+}
+
+const handleShowAdd = () => {
+  isShowModal.value = true
+  itemEdit.value = null
+}
+
+const modifyItem = (item, index) => {
+  if (index !== null) {
+    poDetail.value.items.splice(index, 1, item)
+  } else {
+    poDetail.value.items.push(item)
   }
 }
+
+const handleShowEdit = index => {
+  itemEdit.value = { item: poDetail.value.items[index], index }
+  isShowModal.value = true
+}
+
+const getSubjectName = (id) => {
+  return subjects.value.find((item) => item.id === id)?.name
+}
+
+const isEditing = computed(() => !!route.params.id)
+
+const totalPages = computed(() => Math.floor(poDetail.value.items.length / itemPerPage))
+
+const slicedItems = computed(() => {
+  return poDetail.value.items.slice((page.value - 1) * itemPerPage, (page.value - 1) * itemPerPage + itemPerPage)
+})
 </script>
 
 <template>
@@ -134,7 +119,7 @@ export default {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in poDetail.items.slice(startIndex, endIndex)" :key="item.id">
+        <tr v-for="(item, index) in slicedItems" :key="item.id">
           <td>{{ index + 1 }}</td>
           <td>{{ getSubjectName(item.subjectId) ?? item.subject.name }}</td>
           <td>{{ item.quantity }}</td>
@@ -143,7 +128,7 @@ export default {
         </tr>
       </tbody>
     </v-table>
-    <v-pagination v-model="itemPage" :length="totalPages"></v-pagination>
+    <v-pagination v-model="page" :length="totalPages"></v-pagination>
     <v-dialog v-model="isShowModal" width="1000">
       <ItemModal @close="toggleModal" @modify-item="modifyItem" :subjects="subjects" :item-edit="itemEdit" />
     </v-dialog>

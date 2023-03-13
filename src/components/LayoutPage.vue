@@ -1,29 +1,14 @@
-<script>
+<script setup>
 import { useUserStore } from '../stores/user'
-import SideBar from '../components/SideBar.vue'
+import SideBar from './SideBar.vue'
 import { logout } from '../services';
-export default {
-  name: 'LayoutPage',
-  components: {
-    SideBar
-  },
-  data() {
-    return {
-      drawer: false
-    }
-  },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
-  },
-  methods: {
-    toggleDrawer() {
-      this.drawer = !this.drawer
-    },
-    handleLogout() {
-      logout()
-    }
-  }
+import { ref } from 'vue';
+
+const drawer = ref(false)
+const userStore = useUserStore()
+
+const toggleDrawer = () => {
+  drawer.value = !drawer.value
 }
 </script>
 
@@ -43,7 +28,7 @@ export default {
             <v-list-item key="changePassword">
               <v-list-item-title>Change password</v-list-item-title>
             </v-list-item>
-            <v-list-item key="logout" @click="handleLogout">
+            <v-list-item key="logout" @click="logout">
               <v-list-item-title>Logout</v-list-item-title>
             </v-list-item>
           </v-list>

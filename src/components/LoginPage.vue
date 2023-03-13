@@ -1,48 +1,26 @@
-<script>
+<script setup>
+import { ref } from 'vue';
 import { userService } from '../services/user.service'
 import { useUserStore } from '../stores/user'
+import { useRouter } from 'vue-router'
+import { useFetch } from '../helpers';
 
-export default {
-  name: 'LoginPage',
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
-  },
-  data() {
-    return {
-      username: '',
-      password: '',
-      loading: false,
-      usernameRules: [
-        value => {
-          if (value) return true
+const userStore = useUserStore()
+const username = ref('')
+const password = ref('')
+const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}`]
+const form = ref(null)
+const router = useRouter()
+const { loading, data, execute } = useFetch(() => userService.login(username.value, password.value))
 
-          return 'You must enter username.'
-        },
-      ],
-      passwordRules: [
-        value => {
-          if (value) return true
+const login = async () => {
+  const { valid } = await form.value.validate()
 
-          return 'You must enter password.'
-        },
-      ],
-    }
-  },
-  methods: {
-    async login() {
-      const { valid } = await this.$refs.form.validate()
-
-      if (valid) {
-        this.loading = true
-        userService.login(this.username, this.password).then((user) => {
-          this.$router.push('/')
-          this.userStore.setUser(user)
-          this.loading = false
-        })
-      }
-    },
-  },
+  if (valid) {
+    await execute()
+    userStore.setUser(data.value)
+    router.push('/')
+  }
 }
 </script>
 <template>
@@ -50,8 +28,8 @@ export default {
     <v-sheet v-if="!loading && !userStore.user" width="300" class="mx-auto my-auto">
       <v-form ref="form" @submit.prevent="login">
         <div class="text-h4 mb-3">Login</div>
-        <v-text-field v-model="username" :rules="usernameRules" label="Username"></v-text-field>
-        <v-text-field v-model="password" :rules="passwordRules" label="Password" type="password"></v-text-field>
+        <v-text-field v-model="username" :rules="rules('username')" label="Username"></v-text-field>
+        <v-text-field v-model="password" :rules="rules('password')" label="Password" type="password"></v-text-field>
         <v-btn type="submit" block class="mt-2">Login</v-btn>
       </v-form>
     </v-sheet>

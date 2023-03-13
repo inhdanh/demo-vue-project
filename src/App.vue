@@ -1,20 +1,14 @@
-<script>
+<script setup>
 import { useUserStore } from './stores/user'
 import { USER } from './constants'
-import LayoutPage from './components/Layout.vue'
-export default {
-  components: {
-    LayoutPage
-  },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
-  },
-  mounted() {
-    const user = JSON.parse(localStorage.getItem(USER))
-    this.userStore.setUser(user)
-  }
-}
+import LayoutPage from './components/LayoutPage.vue'
+import { onMounted } from 'vue'
+
+const userStore = useUserStore()
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem(USER))
+  userStore.setUser(user)
+})
 </script>
 
 <template>

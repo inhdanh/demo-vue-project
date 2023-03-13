@@ -1,54 +1,34 @@
-<script>
-export default {
-  name: 'ItemModal',
-  props: ['itemEdit', 'subjects'],
-  data() {
-    return {
-      item: {
-        quantity: 0,
-        unitCost: 0,
-        subject: null
-      },
-      editIndex: null,
-      rules(fieldName) {
-        return [
-          value => {
-            if (value) return true
+<script setup>
+import { ref, watch } from 'vue';
 
-            return `You must enter ${fieldName}.`
-          },
-        ]
-      }
-    }
-  },
-  methods: {
-    async handleSubmit() {
-      const { valid } = await this.$refs.form.validate()
+const props = defineProps(['itemEdit', 'subjects'])
+const item = ref({ quantity: 0, unitCost: 0, subject: 0 })
+const editIndex = ref(0)
+const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}.`]
+const form = ref(null)
+const emit = defineEmits(['modifyItem', 'close'])
 
-      if (valid) {
-        this.$emit('modifyItem', this.item, this.editIndex)
-        this.$emit('close')
-      }
-    }
-  },
-  watch: {
-    itemEdit: {
-      immediate: true,
-      handler(newItem) {
-        if (!newItem) {
-          this.item = {
-            quantity: 0,
-            unitCost: 0,
-            subject: null
-          }
-        } else {
-          this.item = { ...newItem.item }
-          this.editIndex = newItem.index
-        }
-      }
-    }
+const handleSubmit = async () => {
+  const { valid } = await form.value.validate()
+
+  if (valid) {
+    emit('modifyItem', item.value, editIndex.value)
+    emit('close')
   }
 }
+
+watch(ref(props.itemEdit), (newItem) => {
+  if (!newItem) {
+    item.value = {
+      quantity: 0,
+      unitCost: 0,
+      subject: null
+    }
+  } else {
+    item.value = { ...newItem.item }
+    editIndex.value = newItem.index
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -65,7 +45,7 @@ export default {
             <v-text-field type="number" :min="0" v-model="item.unitCost" label="Unit cost" :rules="rules('unit cost')" />
           </v-col>
           <v-col cols="4">
-            <v-select v-model="item.subjectId" label="Subject" :items="subjects" item-title="name" item-value="id"
+            <v-select v-model="item.subjectId" label="Subject" :items="props.subjects" item-title="name" item-value="id"
               :rules="rules('subject')" />
           </v-col>
         </v-row>

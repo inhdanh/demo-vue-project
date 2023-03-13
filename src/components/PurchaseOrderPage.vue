@@ -1,80 +1,66 @@
-<script>
+<script setup>
+import { ref, onMounted, watch } from 'vue'
 import { PAGE_SIZE } from '../constants'
 import { purchaseOrderService, commonServices } from '../services'
+import { useRouter } from 'vue-router';
 
-export default {
-  data() {
-    return {
-      params: {
-        page: 1,
-        limit: PAGE_SIZE,
-        code: null,
-        poStatusId: null,
-        summary: '',
-        costCenterId: null
+const router = useRouter()
 
-      },
-      purchaseOrders: [],
-      loading: false,
-      timeout: null,
-      pageCount: 0,
-      total: 0,
-      statusOptions: [
-        { value: '', name: 'All' },
-        { value: 1, name: 'Draft' },
-        { value: 2, name: 'Awaiting Review' },
-        { value: 3, name: 'Completed' },
-        { value: 4, name: 'Awaiting Approval' },
-        { value: 5, name: 'Awaiting Payment' },
-        { value: 6, name: 'Paid' },
-      ],
-      costCenters: []
-    }
-  },
-  mounted() {
-    this.getPurchaseOrder(this.params)
-    commonServices.getCostCenterByParams().then(data => {
-      this.costCenters = data.items
-    })
-  },
-  watch: {
-    params: {
-      handler(newValues) {
-        clearTimeout(this.timeout)
-        this.timeout = setTimeout(() => {
-          this.getPurchaseOrder(newValues)
-        }, 500)
-      },
-      deep: true
-    },
-    'params.code'() {
-      this.params.page = 1
-    },
-    'params.poStatusId'() {
-      this.params.page = 1
-    },
-    'params.summary'() {
-      this.params.page = 1
-    },
-    'params.costCenterId'() {
-      this.params.page = 1
-    }
-  },
-  methods: {
-    async getPurchaseOrder(params) {
-      this.loading = true
-      const newParams = Object.entries(params).reduce((a, [k, v]) => (v ? ((a[k] = v), a) : a), {})
-      const data = await purchaseOrderService.getPurchaseOrderByParams(newParams)
-      this.purchaseOrders = data.items
-      this.pageCount = data.pageCount
-      this.total = data.totalItems
-      this.loading = false
-    },
-    goToPath(path) {
-      this.$router.push(path)
-    }
-  }
+const params = ref({
+  page: 1,
+  limit: PAGE_SIZE,
+  code: null,
+  poStatusId: null,
+  summary: '',
+  costCenterId: null
+
+})
+const purchaseOrders = ref([])
+const loading = ref(false)
+const timeout = ref(null)
+const pageCount = ref(0)
+const total = ref(0)
+const statusOptions = [
+  { value: '', name: 'All' },
+  { value: 1, name: 'Draft' },
+  { value: 2, name: 'Awaiting Review' },
+  { value: 3, name: 'Completed' },
+  { value: 4, name: 'Awaiting Approval' },
+  { value: 5, name: 'Awaiting Payment' },
+  { value: 6, name: 'Paid' },
+]
+const costCenters = ref([])
+
+const getPurchaseOrder = async (params) => {
+  loading.value = true
+  const newParams = Object.entries(params).reduce((a, [k, v]) => (v ? ((a[k] = v), a) : a), {})
+  const data = await purchaseOrderService.getPurchaseOrderByParams(newParams)
+  purchaseOrders.value = data.items
+  pageCount.value = data.pageCount
+  total.value = data.totalItems
+  loading.value = false
 }
+
+onMounted(async () => {
+  const data = await commonServices.getCostCenterByParams()
+  costCenters.value = data.items
+})
+
+const goToPath = path => {
+  router.push(path)
+}
+
+watch(params, (newParams) => {
+  clearTimeout(timeout.value)
+  timeout.value = setTimeout(() => {
+    getPurchaseOrder(newParams)
+  }, 500)
+}, { immediate: true, deep: true })
+
+watch(() => [params.value.code, params.value.poStatusId, params.value.summary, params.value.costCenterId], () => {
+  params.value.page = 1
+})
+
 </script>
 <template>
   <v-container>
@@ -125,20 +111,3 @@ export default {
     <v-pagination v-model="params.page" :length="pageCount"></v-pagination>
   </v-container>
 </template>
-
-<style scoped>
-.active {
-  font-weight: bold;
-}
-
-.pagination {
-  list-style-type: none;
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-}
-
-.pagination li {
-  cursor: pointer;
-}
-</style>
