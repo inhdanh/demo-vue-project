@@ -1,8 +1,8 @@
 <script setup>
 import { useUserStore } from '../stores/user'
 import SideBar from './SideBar.vue'
-import { logout } from '../services';
-import { ref } from 'vue';
+import { logout } from '../services'
+import { ref } from 'vue'
 
 const drawer = ref(false)
 const userStore = useUserStore()

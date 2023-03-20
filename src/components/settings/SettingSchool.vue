@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 const tab = ref(null)
 </script>
@@ -14,17 +14,11 @@ const tab = ref(null)
 
       <v-card-text>
         <v-window v-model="tab">
-          <v-window-item value="costCenter">
-            Cost center
-          </v-window-item>
+          <v-window-item value="costCenter"> Cost center </v-window-item>
 
-          <v-window-item value="gradeClass">
-            Grade class
-          </v-window-item>
+          <v-window-item value="gradeClass"> Grade class </v-window-item>
 
-          <v-window-item value="subject">
-            Subject
-          </v-window-item>
+          <v-window-item value="subject"> Subject </v-window-item>
         </v-window>
       </v-card-text>
     </v-card>

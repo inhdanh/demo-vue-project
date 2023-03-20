@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { purchaseOrderService, commonServices } from '../services'
 import ItemModal from './ItemModal.vue'
 import { useRoute } from 'vue-router'
-import { useFetch } from '../helpers';
+import { useFetch } from '../helpers'
 
 const route = useRoute()
 
@@ -24,13 +24,18 @@ const subjects = ref([])
 const itemEdit = ref(null)
 const page = ref(1)
 const itemPerPage = 2
-const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}`]
-const { loading, data: dataPO, execute } = useFetch(() =>
-  purchaseOrderService.getPurchaseOrderById(route.params.id)
-)
+const rules = (fieldName) => [(value) => (value ? true : `You must enter ${fieldName}`)]
+const {
+  loading,
+  data: dataPO,
+  execute
+} = useFetch(() => purchaseOrderService.getPurchaseOrderById(route.params.id))
 
 onMounted(async () => {
-  const [resCurrency, resSubject] = await Promise.all([commonServices.getCurrencyByParams(), commonServices.getSubjectByParams()])
+  const [resCurrency, resSubject] = await Promise.all([
+    commonServices.getCurrencyByParams(),
+    commonServices.getSubjectByParams()
+  ])
   currencies.value = resCurrency.items
   subjects.value = resSubject.items
 
@@ -57,7 +62,7 @@ const modifyItem = (item, index) => {
   }
 }
 
-const handleShowEdit = index => {
+const handleShowEdit = (index) => {
   itemEdit.value = { item: poDetail.value.items[index], index }
   isShowModal.value = true
 }
@@ -71,7 +76,10 @@ const isEditing = computed(() => !!route.params.id)
 const totalPages = computed(() => Math.ceil(poDetail.value?.items?.length / itemPerPage))
 
 const slicedItems = computed(() => {
-  return poDetail.value.items.slice((page.value - 1) * itemPerPage, (page.value - 1) * itemPerPage + itemPerPage)
+  return poDetail.value.items.slice(
+    (page.value - 1) * itemPerPage,
+    (page.value - 1) * itemPerPage + itemPerPage
+  )
 })
 </script>
 
@@ -87,16 +95,29 @@ const slicedItems = computed(() => {
           <v-text-field v-model="poDetail.code" disabled label="Code"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field v-model="poDetail.createdBy.name" disabled label="Created By"></v-text-field>
+          <v-text-field
+            v-model="poDetail.createdBy.name"
+            disabled
+            label="Created By"
+          ></v-text-field>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="6">
-          <v-text-field v-model="poDetail.summary" :rules="rules('summary')" label="Summary"></v-text-field>
+          <v-text-field
+            v-model="poDetail.summary"
+            :rules="rules('summary')"
+            label="Summary"
+          ></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-select v-model="poDetail.currency.code" label="Currency" :items="currencies" item-title="name"
-            item-value="code" />
+          <v-select
+            v-model="poDetail.currency.code"
+            label="Currency"
+            :items="currencies"
+            item-title="name"
+            item-value="code"
+          />
         </v-col>
       </v-row>
     </v-form>
@@ -120,14 +141,25 @@ const slicedItems = computed(() => {
           <td>{{ getSubjectName(item.subjectId) ?? item.subject.name }}</td>
           <td>{{ item.quantity }}</td>
           <td>{{ item.unitCost }}</td>
-          <td><v-btn size="small" color="primary" @click="handleShowEdit(index)" icon="mdi-pencil"></v-btn></td>
+          <td>
+            <v-btn
+              size="small"
+              color="primary"
+              @click="handleShowEdit(index)"
+              icon="mdi-pencil"
+            ></v-btn>
+          </td>
         </tr>
       </tbody>
     </v-table>
     <v-pagination v-model="page" :length="totalPages"></v-pagination>
     <v-dialog v-model="isShowModal" width="1000">
-      <ItemModal @close="toggleModal" @modify-item="modifyItem" :subjects="subjects" :item-edit="itemEdit" />
+      <ItemModal
+        @close="toggleModal"
+        @modify-item="modifyItem"
+        :subjects="subjects"
+        :item-edit="itemEdit"
+      />
     </v-dialog>
   </v-container>
 </template>
-

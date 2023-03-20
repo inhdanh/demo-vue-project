@@ -1,12 +1,12 @@
 <script setup>
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue'
 
 const todos = ref(JSON.parse(localStorage.getItem('todos')))
 const todoInput = ref()
 const uuidv4 = () => {
-  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-  );
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+  )
 }
 const filter = ref('all')
 
@@ -24,8 +24,8 @@ watchEffect(() => {
 })
 const filters = {
   all: () => todos.value,
-  active: () => todos.value.filter(item => !item.completed),
-  completed: () => todos.value.filter(item => item.completed)
+  active: () => todos.value.filter((item) => !item.completed),
+  completed: () => todos.value.filter((item) => item.completed)
 }
 </script>
 <template>
@@ -33,7 +33,7 @@ const filters = {
   <input class="input-todo" v-model="todoInput" />
   <button @click="handleSave">Save</button>
   <div v-for="todo in filters[filter]()" :key="todo.id">
-    <input type="checkbox" :id="todo.id" v-model="todos.find(i => i.id === todo.id).completed" />
+    <input type="checkbox" :id="todo.id" v-model="todos.find((i) => i.id === todo.id).completed" />
     <label :for="todo.id">{{ todo.title }}</label>
   </div>
   <div>

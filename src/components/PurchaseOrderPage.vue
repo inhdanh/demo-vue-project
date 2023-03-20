@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { PAGE_SIZE } from '../constants'
 import { purchaseOrderService, commonServices } from '../services'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -13,7 +13,6 @@ const params = ref({
   poStatusId: null,
   summary: '',
   costCenterId: null
-
 })
 const purchaseOrders = ref([])
 const loading = ref(false)
@@ -27,7 +26,7 @@ const statusOptions = [
   { value: 3, name: 'Completed' },
   { value: 4, name: 'Awaiting Approval' },
   { value: 5, name: 'Awaiting Payment' },
-  { value: 6, name: 'Paid' },
+  { value: 6, name: 'Paid' }
 ]
 const costCenters = ref([])
 
@@ -46,42 +45,68 @@ onMounted(async () => {
   costCenters.value = data.items
 })
 
-const goToPath = path => {
+const goToPath = (path) => {
   router.push(path)
 }
 
-watch(params, (newParams) => {
-  clearTimeout(timeout.value)
-  timeout.value = setTimeout(() => {
-    getPurchaseOrder(newParams)
-  }, 500)
-}, { immediate: true, deep: true })
+watch(
+  params,
+  (newParams) => {
+    clearTimeout(timeout.value)
+    timeout.value = setTimeout(() => {
+      getPurchaseOrder(newParams)
+    }, 500)
+  },
+  { immediate: true, deep: true }
+)
 
-watch(() => [params.value.code, params.value.poStatusId, params.value.summary, params.value.costCenterId], () => {
-  params.value.page = 1
-})
-
+watch(
+  () => [
+    params.value.code,
+    params.value.poStatusId,
+    params.value.summary,
+    params.value.costCenterId
+  ],
+  () => {
+    params.value.page = 1
+  }
+)
 </script>
 <template>
   <v-container>
     <h4 class="text-h4">Purchase order</h4>
     <div class="d-flex justify-end">
-      <v-btn variant="outlined" prepend-icon="mdi-plus-circle" @click="goToPath('/purchase-order/add')">Create</v-btn>
+      <v-btn
+        variant="outlined"
+        prepend-icon="mdi-plus-circle"
+        @click="goToPath('/purchase-order/add')"
+        >Create</v-btn
+      >
     </div>
     <v-row class="mt-5">
       <v-col cols="3">
         <v-text-field v-model="params.code" label="Code" />
       </v-col>
       <v-col cols="3">
-        <v-select v-model="params.poStatusId" label="Status" :items="statusOptions" item-title="name"
-          item-value="value" />
+        <v-select
+          v-model="params.poStatusId"
+          label="Status"
+          :items="statusOptions"
+          item-title="name"
+          item-value="value"
+        />
       </v-col>
       <v-col cols="3">
         <v-text-field v-model="params.summary" label="Summary" />
       </v-col>
       <v-col cols="3">
-        <v-select v-model="params.costCenterId" label="Cost Center" :items="costCenters" item-title="name"
-          item-value="id" />
+        <v-select
+          v-model="params.costCenterId"
+          label="Cost Center"
+          :items="costCenters"
+          item-title="name"
+          item-value="id"
+        />
       </v-col>
     </v-row>
     <div class="text-subtitle-1">Total: {{ total }}</div>
