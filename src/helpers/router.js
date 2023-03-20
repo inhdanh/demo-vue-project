@@ -35,9 +35,19 @@ export const router = createRouter({
       component: () => import('../components/PaymentRequestPage.vue')
     },
     {
-      path: '/setting',
-      name: 'setting',
-      component: () => import('../components/SettingPage.vue')
+      path: '/setting/school',
+      name: 'settingSchool',
+      component: () => import('../components/settings/SettingSchool.vue')
+    },
+    {
+      path: '/setting/staff',
+      name: 'settingStaff',
+      component: () => import('../components/settings/SettingStaff.vue')
+    },
+    {
+      path: '/setting/payment',
+      name: 'settingPayment',
+      component: () => import('../components/settings/SettingPayment.vue')
     },
     {
       path: '/login',

@@ -25,23 +25,19 @@ const itemEdit = ref(null)
 const page = ref(1)
 const itemPerPage = 2
 const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}`]
-const { loading, data: dataPO, execute } = useFetch(() => {
-  if (route.params.id)
-    purchaseOrderService.getPurchaseOrderById(route.params.id)
-})
+const { loading, data: dataPO, execute } = useFetch(() =>
+  purchaseOrderService.getPurchaseOrderById(route.params.id)
+)
 
 onMounted(async () => {
+  const [resCurrency, resSubject] = await Promise.all([commonServices.getCurrencyByParams(), commonServices.getSubjectByParams()])
+  currencies.value = resCurrency.items
+  subjects.value = resSubject.items
 
-  await execute()
-  poDetail.value = dataPO.value
-
-  commonServices.getCurrencyByParams().then((data) => {
-    currencies.value = data.items
-  })
-
-  commonServices.getSubjectByParams().then((data) => {
-    subjects.value = data.items
-  })
+  if (route.params.id) {
+    await execute()
+    poDetail.value = dataPO.value
+  }
 })
 
 const toggleModal = () => {
@@ -72,7 +68,7 @@ const getSubjectName = (id) => {
 
 const isEditing = computed(() => !!route.params.id)
 
-const totalPages = computed(() => Math.floor(poDetail.value.items.length / itemPerPage))
+const totalPages = computed(() => Math.ceil(poDetail.value?.items?.length / itemPerPage))
 
 const slicedItems = computed(() => {
   return poDetail.value.items.slice((page.value - 1) * itemPerPage, (page.value - 1) * itemPerPage + itemPerPage)

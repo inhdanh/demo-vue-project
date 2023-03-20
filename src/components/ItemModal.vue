@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 
 const props = defineProps(['itemEdit', 'subjects'])
 const item = ref({ quantity: 0, unitCost: 0, subject: 0 })
-const editIndex = ref(0)
+const editIndex = ref(null)
 const rules = (fieldName) => [value => value ? true : `You must enter ${fieldName}.`]
 const form = ref(null)
 const emit = defineEmits(['modifyItem', 'close'])
@@ -24,10 +24,12 @@ watch(ref(props.itemEdit), (newItem) => {
       unitCost: 0,
       subject: null
     }
+    editIndex.value = null
   } else {
     item.value = { ...newItem.item }
     editIndex.value = newItem.index
   }
+
 }, { immediate: true })
 </script>
 
