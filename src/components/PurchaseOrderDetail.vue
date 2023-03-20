@@ -63,7 +63,10 @@ const modifyItem = (item, index) => {
 }
 
 const handleShowEdit = (index) => {
-  itemEdit.value = { item: poDetail.value.items[index], index }
+  itemEdit.value = {
+    item: poDetail.value.items[index],
+    index
+  }
   isShowModal.value = true
 }
 
@@ -85,7 +88,9 @@ const slicedItems = computed(() => {
 
 <template>
   <v-container>
-    <div class="text-h4">{{ isEditing ? 'Purchase order detail' : 'Create purchase order' }}</div>
+    <div class="text-h4">
+      {{ isEditing ? 'Purchase order detail' : 'Create purchase order' }}
+    </div>
     <div v-if="loading" class="w-100 d-flex justify-center">
       <v-progress-circular indeterminate color="teal"></v-progress-circular>
     </div>
@@ -138,7 +143,9 @@ const slicedItems = computed(() => {
       <tbody>
         <tr v-for="(item, index) in slicedItems" :key="item.id">
           <td>{{ index + 1 }}</td>
-          <td>{{ getSubjectName(item.subjectId) ?? item.subject.name }}</td>
+          <td>
+            {{ getSubjectName(item.subjectId) ?? item.subject.name }}
+          </td>
           <td>{{ item.quantity }}</td>
           <td>{{ item.unitCost }}</td>
           <td>

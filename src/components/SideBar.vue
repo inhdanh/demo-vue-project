@@ -7,9 +7,21 @@ const router = useRouter()
 const open = ref([])
 
 const menu = [
-  { name: 'Dashboard', path: '/dashboard', icon: 'mdi-chart-bar' },
-  { name: 'Purchase Order', path: '/purchase-order', icon: 'mdi-cart' },
-  { name: 'Payment Request', path: '/payment-request', icon: 'mdi-credit-card' }
+  {
+    name: 'Dashboard',
+    path: '/dashboard',
+    icon: 'mdi-chart-bar'
+  },
+  {
+    name: 'Purchase Order',
+    path: '/purchase-order',
+    icon: 'mdi-cart'
+  },
+  {
+    name: 'Payment Request',
+    path: '/payment-request',
+    icon: 'mdi-credit-card'
+  }
 ]
 
 const menuSettings = [

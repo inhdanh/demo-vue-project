@@ -129,7 +129,9 @@ watch(
           </td>
           <td>{{ item.poStatus?.name }}</td>
           <td>{{ item.summary }}</td>
-          <td>{{ Number(item.totalPayableTo).toLocaleString() }}</td>
+          <td>
+            {{ Number(item.totalPayableTo).toLocaleString() }}
+          </td>
         </tr>
       </tbody>
     </v-table>

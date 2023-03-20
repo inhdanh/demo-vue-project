@@ -2,7 +2,11 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps(['itemEdit', 'subjects'])
-const item = ref({ quantity: 0, unitCost: 0, subject: 0 })
+const item = ref({
+  quantity: 0,
+  unitCost: 0,
+  subject: 0
+})
 const editIndex = ref(null)
 const rules = (fieldName) => [(value) => (value ? true : `You must enter ${fieldName}.`)]
 const form = ref(null)
@@ -39,7 +43,9 @@ watch(
 <template>
   <v-card>
     <v-container>
-      <div class="text-h6">{{ editIndex !== null ? 'Edit PO' : 'Create PO' }}</div>
+      <div class="text-h6">
+        {{ editIndex !== null ? 'Edit PO' : 'Create PO' }}
+      </div>
       <v-divider></v-divider>
       <v-form @submit.prevent="handleSubmit" ref="form" class="mt-5">
         <v-row>
